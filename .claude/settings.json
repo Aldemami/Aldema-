@@ -1,0 +1,19 @@
+{
+  "permissions": {
+    "allow": [
+      "Skill(z2h:*)"
+    ]
+  },
+  "hooks": {
+    "Stop": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "if [ -f .zth/dev.pid ]; then PGID=$(ps -o pgid= -p $(cat .zth/dev.pid) 2>/dev/null | tr -d ' '); [ -n \"$PGID\" ] && kill -- -$PGID 2>/dev/null; rm -f .zth/dev.pid; fi"
+          }
+        ]
+      }
+    ]
+  }
+}

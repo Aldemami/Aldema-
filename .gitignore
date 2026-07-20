@@ -1,0 +1,4 @@
+# z2h-cli
+.zth/
+build/
+node_modules/

@@ -1,0 +1,10 @@
+{
+  "name": "business-support-hub",
+  "version": "0.0.0",
+  "private": true,
+  "scripts": {
+    "start": "z2h-cli dev",
+    "build": "z2h-cli build",
+    "deploy": "z2h-cli deploy"
+  }
+}
