@@ -1,0 +1,88 @@
+.root {
+  width: 100vw;
+  min-height: 100vh;
+  box-sizing: border-box;
+  padding: var(--spacing-large) var(--spacing-xl);
+  background-color: var(--primary-background-color);
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-medium);
+}
+
+.header {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-xs);
+}
+
+.toolbar {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-small);
+  flex-wrap: wrap;
+}
+
+.search {
+  width: 320px;
+}
+
+.channelChips {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--spacing-xs);
+}
+
+.channelChip {
+  cursor: pointer;
+}
+
+.channelChipInactive {
+  opacity: 0.45;
+}
+
+.groups {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-large);
+}
+
+.group {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-small);
+}
+
+.groupHeader {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-small);
+}
+
+.cards {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
+  gap: var(--spacing-medium);
+}
+
+.card {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-xs);
+  padding: var(--spacing-medium);
+  border: 1px solid var(--ui-border-color);
+  border-radius: var(--border-radius-medium);
+  background-color: var(--secondary-background-color);
+}
+
+.cardMeta {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-small);
+  flex-wrap: wrap;
+}
+
+.empty {
+  padding: var(--spacing-large);
+  text-align: center;
+}
