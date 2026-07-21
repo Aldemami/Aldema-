@@ -148,8 +148,27 @@
 .tableHeadRow,
 .row {
   display: grid;
-  grid-template-columns: 6px minmax(280px, 2.2fr) 220px 180px 90px;
+  grid-template-columns: 6px minmax(260px, 2.2fr) 110px 220px 180px 90px;
   align-items: center;
+}
+
+.tagsRow {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: var(--spacing-xs);
+  padding: 0 var(--spacing-xl) var(--spacing-small);
+}
+
+.clickableChip {
+  cursor: pointer;
+}
+
+.detailTags {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: var(--spacing-xs);
 }
 
 .tableHeadRow {
@@ -227,7 +246,8 @@
   }
 
   .dateHeadCell,
-  .dateCell {
+  .dateCell,
+  .priorityCell {
     display: none;
   }
 }

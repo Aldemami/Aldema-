@@ -43,6 +43,8 @@ export const GROUPS: Group[] = [
   { key: 'techUpdates', emoji: '📢', title: 'Updates for Policy or Tech Changes', chipColor: 'teal' },
 ];
 
+export type Priority = 'high' | 'medium' | 'low';
+
 export interface TeamUpdate {
   id: string;
   group: GroupKey;
@@ -51,9 +53,32 @@ export interface TeamUpdate {
   date: string; // ISO
   title: string;
   summary: string;
+  tags: string[];
+  priority: Priority;
 }
 
-export const UPDATES: TeamUpdate[] = [
+// Tags and priority assigned during the Claude scan per update id.
+const META: Record<string, { tags: string[]; priority: Priority }> = {
+  'crm-suite-launch': { tags: ['CRM', 'AI', 'Product Launch'], priority: 'high' },
+  'quotes-stuck-approval': { tags: ['CPQ', 'Salesforce', 'Bug'], priority: 'high' },
+  'ai-credits-proration-error': { tags: ['CPQ', 'AI Credits', 'Workaround'], priority: 'medium' },
+  'success-factors-maintenance': { tags: ['Systems', 'Maintenance'], priority: 'medium' },
+  'reopen-renewal-opps': { tags: ['Renewals', 'Process'], priority: 'high' },
+  'opt-out-arr-decrease': { tags: ['Opt Outs', 'RevOps', 'Process'], priority: 'medium' },
+  'opt-out-hold-off': { tags: ['Opt Outs', 'RevOps', 'Process'], priority: 'high' },
+  'q3-ai-credits-spif': { tags: ['SPIF', 'AI Credits', 'Incentives'], priority: 'high' },
+  'bug-board-jul10-17': { tags: ['Bug Board', 'CPQ', 'ARR'], priority: 'medium' },
+  'bug-board-jul7-13': { tags: ['Bug Board', 'CPQ', 'ARR'], priority: 'medium' },
+  'weekly-intel-jul7-13': { tags: ['Intelligence Report', 'Tickets'], priority: 'medium' },
+  'winners-circle-june': { tags: ['Incentives', 'Leaderboard'], priority: 'low' },
+  'madfest-wrap': { tags: ['Events', 'Marketing', 'Leads'], priority: 'low' },
+  'ana-conference-recap': { tags: ['Events', 'Marketing', 'Leads'], priority: 'low' },
+  'tof-context-repo': { tags: ['AI', 'Tooling', 'TOF'], priority: 'low' },
+  'ai-levels-academy': { tags: ['AI', 'Enablement'], priority: 'low' },
+  'codex-credits': { tags: ['AI', 'Tooling'], priority: 'low' },
+};
+
+const RAW_UPDATES: Omit<TeamUpdate, 'tags' | 'priority'>[] = [
   {
     id: 'crm-suite-launch',
     group: 'releases',
@@ -225,3 +250,13 @@ export const UPDATES: TeamUpdate[] = [
       'For anyone building non-work projects with Codex on a personal subscription: posting about gpt5.6 on X and submitting it to the promo minisite grants $100 in personal Codex credits.',
   },
 ];
+
+export const UPDATES: TeamUpdate[] = RAW_UPDATES.map(u => ({
+  ...u,
+  tags: META[u.id]?.tags ?? [],
+  priority: META[u.id]?.priority ?? 'low',
+}));
+
+export const ALL_TAGS: string[] = Array.from(
+  new Set(UPDATES.flatMap(u => u.tags))
+).sort();
