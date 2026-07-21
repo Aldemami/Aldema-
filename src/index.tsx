@@ -26,7 +26,6 @@ import {
   TeamUpdate,
 } from './updates';
 
-// Vibe chip color name → CSS color token, used for group color bars and stat cards.
 const GROUP_COLORS: Record<GroupKey, string> = {
   releases: 'var(--color-done-green)',
   incidents: 'var(--color-stuck-red)',
@@ -36,25 +35,23 @@ const GROUP_COLORS: Record<GroupKey, string> = {
   techUpdates: 'var(--color-chili-blue)',
 };
 
-const PRIORITY_CHIP: Record<Priority, { label: string; color: string }> = {
-  high: { label: 'High', color: 'stuck-red' },
-  medium: { label: 'Medium', color: 'working_orange' },
-  low: { label: 'Low', color: 'explosive' },
+// Severity labels follow the comm-hub convention: Critical / Important / FYI.
+const SEVERITY: Record<Priority, { label: string; chip: string }> = {
+  high: { label: 'Critical', chip: 'stuck-red' },
+  medium: { label: 'Important', chip: 'working_orange' },
+  low: { label: 'FYI', chip: 'explosive' },
 };
 
 type RangeKey = 'all' | 'day' | 'week' | 'month';
+type View = 'home' | 'search' | GroupKey;
 
-const RANGE_DAYS: Record<RangeKey, number | null> = {
-  all: null,
-  day: 1,
-  week: 7,
-  month: 31,
-};
+const RANGE_DAYS: Record<RangeKey, number | null> = { all: null, day: 1, week: 7, month: 31 };
 
 function formatDate(iso: string): string {
   return new Date(iso + 'T00:00:00').toLocaleDateString('en-US', {
     month: 'short',
     day: 'numeric',
+    year: 'numeric',
   });
 }
 
@@ -92,7 +89,7 @@ function UpdateRow({
   onTagClick: (tag: string) => void;
 }) {
   const channel = CHANNELS.find(c => c.name === update.channel);
-  const priority = PRIORITY_CHIP[update.priority];
+  const severity = SEVERITY[update.priority];
   return (
     <>
       <button type="button" className={styles.rowButton} onClick={onToggle} aria-expanded={expanded}>
@@ -104,13 +101,7 @@ function UpdateRow({
             </Text>
           </div>
           <div className={`${styles.cell} ${styles.priorityCell}`}>
-            <Chips
-              label={priority.label}
-              readOnly
-              size="small"
-              color={priority.color as never}
-              noMargin
-            />
+            <Chips label={severity.label} readOnly size="small" color={severity.chip as never} noMargin />
           </div>
           <div className={styles.cell}>
             <Chips label={`#${update.channel}`} readOnly size="small" color="explosive" noMargin />
@@ -122,7 +113,9 @@ function UpdateRow({
             </Text>
           </div>
           <div className={`${styles.cell} ${styles.dateCell}`}>
-            <Text type="text3" color="secondary">{formatDate(update.date)}</Text>
+            <Text type="text3" color="secondary">
+              {formatDate(update.date).replace(', 2026', '')}
+            </Text>
           </div>
         </div>
       </button>
@@ -157,13 +150,15 @@ function UpdateRow({
 }
 
 export default function BusinessSupportHub() {
+  const [view, setView] = useState<View>('home');
   const [query, setQuery] = useState('');
   const [channelFilter, setChannelFilter] = useState<ChannelOption[]>([]);
-  const [activeGroup, setActiveGroup] = useState<GroupKey | null>(null);
+  const [severityFilter, setSeverityFilter] = useState<Priority | null>(null);
   const [range, setRange] = useState<RangeKey>('all');
   const [activeTags, setActiveTags] = useState<string[]>([]);
   const [collapsed, setCollapsed] = useState<Record<string, boolean>>({});
   const [expandedRow, setExpandedRow] = useState<string | null>(null);
+  const [criticalIndex, setCriticalIndex] = useState(0);
 
   const channelOptions: ChannelOption[] = useMemo(
     () => CHANNELS.map(c => ({ label: `#${c.name}`, value: c.name })),
@@ -181,6 +176,7 @@ export default function BusinessSupportHub() {
     return UPDATES.filter(u => {
       if (maxDays !== null && daysAgo(u.date) >= maxDays) return false;
       if (channels.length > 0 && !channels.includes(u.channel)) return false;
+      if (severityFilter && u.priority !== severityFilter) return false;
       if (activeTags.length > 0 && !activeTags.every(t => u.tags.includes(t))) return false;
       if (!q) return true;
       return (
@@ -197,84 +193,64 @@ export default function BusinessSupportHub() {
       }
       return b.date.localeCompare(a.date);
     });
-  }, [query, channelFilter, range, activeTags]);
+  }, [query, channelFilter, severityFilter, range, activeTags]);
 
-  const highCount = filtered.filter(u => u.priority === 'high').length;
-  const visibleGroups = activeGroup ? GROUPS.filter(g => g.key === activeGroup) : GROUPS;
-  const hasResults = visibleGroups.some(g => filtered.some(u => u.group === g.key));
+  const counts = useMemo(
+    () => ({
+      total: filtered.length,
+      critical: filtered.filter(u => u.priority === 'high').length,
+      important: filtered.filter(u => u.priority === 'medium').length,
+      fyi: filtered.filter(u => u.priority === 'low').length,
+    }),
+    [filtered]
+  );
+
+  const criticalUpdates = useMemo(() => UPDATES.filter(u => u.priority === 'high'), []);
+  const safeCriticalIndex = Math.min(criticalIndex, Math.max(0, criticalUpdates.length - 1));
+  const criticalItem = criticalUpdates[safeCriticalIndex];
+  const criticalChannel = criticalItem
+    ? CHANNELS.find(c => c.name === criticalItem.channel)
+    : undefined;
+  const criticalGroup = criticalItem ? GROUPS.find(g => g.key === criticalItem.group) : undefined;
+
   const hasFilters =
-    Boolean(query) || channelFilter.length > 0 || Boolean(activeGroup) || range !== 'all' || activeTags.length > 0;
+    Boolean(query) ||
+    channelFilter.length > 0 ||
+    Boolean(severityFilter) ||
+    range !== 'all' ||
+    activeTags.length > 0;
 
   const clearFilters = () => {
     setQuery('');
     setChannelFilter([]);
-    setActiveGroup(null);
+    setSeverityFilter(null);
     setRange('all');
     setActiveTags([]);
   };
 
-  return (
-    <div className={styles.root}>
-      <div className={styles.topBar}>
-        <div className={styles.titleBlock}>
-          <div className={styles.appIcon} aria-hidden="true">📡</div>
-          <div>
-            <Heading type="h1" weight="bold">BS Team Updates Hub</Heading>
-            <div className={styles.subtitleRow}>
-              <Text type="text3" color="secondary">
-                Genuine team updates from {CHANNELS.length} Slack channels — no questions, no help
-                requests. Last scanned {formatDate(SCANNED_AT)} · past {SCAN_WINDOW_DAYS} days
-                {highCount > 0 ? ` · ${highCount} high priority in view` : ''}.
-              </Text>
-            </div>
-          </div>
-        </div>
-        <ButtonGroup
-          options={[
-            { value: 'all', text: 'All time' },
-            { value: 'month', text: 'Month' },
-            { value: 'week', text: 'Week' },
-            { value: 'day', text: 'Today' },
-          ]}
-          value={range}
-          onSelect={(value: string | number) => setRange(value as RangeKey)}
-          size="small"
-          kind="tertiary"
-        />
-      </div>
+  const groupsToRender =
+    view === 'home' || view === 'search' ? GROUPS : GROUPS.filter(g => g.key === view);
 
-      <div className={styles.statsRow}>
-        {GROUPS.map(group => {
-          const count = filtered.filter(u => u.group === group.key).length;
-          const active = activeGroup === group.key;
-          return (
-            <button
-              type="button"
-              key={group.key}
-              className={active ? `${styles.statCard} ${styles.statCardActive}` : styles.statCard}
-              style={{ borderTopColor: GROUP_COLORS[group.key] }}
-              onClick={() => setActiveGroup(active ? null : group.key)}
-              aria-pressed={active}
-              aria-label={`${group.title}: ${count} updates`}
-            >
-              <span className={styles.statCount}>{count}</span>
-              <Text type="text3" color="secondary">
-                {group.emoji} {group.title}
-              </Text>
-            </button>
-          );
-        })}
-      </div>
+  const statCards = [
+    { key: null, label: 'TOTAL UPDATES', icon: '✨', count: counts.total, card: styles.statTotal, num: styles.statCountTotal },
+    { key: 'high' as Priority, label: 'CRITICAL', icon: '⛔', count: counts.critical, card: styles.statCritical, num: styles.statCountCritical },
+    { key: 'medium' as Priority, label: 'IMPORTANT', icon: '📈', count: counts.important, card: styles.statImportant, num: styles.statCountImportant },
+    { key: 'low' as Priority, label: 'FYI', icon: 'ℹ️', count: counts.fyi, card: styles.statFyi, num: styles.statCountFyi },
+  ];
 
+  const renderToolbar = (withSearch: boolean) => (
+    <>
       <div className={styles.toolbar}>
-        <div className={styles.search}>
-          <Search
-            placeholder="Search updates…"
-            value={query}
-            onChange={(value: string) => setQuery(value)}
-            size="small"
-          />
-        </div>
+        {withSearch && (
+          <div className={styles.search}>
+            <Search
+              placeholder="Search updates…"
+              value={query}
+              onChange={(value: string) => setQuery(value)}
+              size="small"
+            />
+          </div>
+        )}
         <div className={styles.channelFilter}>
           <Dropdown
             placeholder="All channels"
@@ -291,6 +267,18 @@ export default function BusinessSupportHub() {
             searchable={false}
           />
         </div>
+        <ButtonGroup
+          options={[
+            { value: 'all', text: 'All time' },
+            { value: 'month', text: 'Month' },
+            { value: 'week', text: 'Week' },
+            { value: 'day', text: 'Today' },
+          ]}
+          value={range}
+          onSelect={(value: string | number) => setRange(value as RangeKey)}
+          size="small"
+          kind="tertiary"
+        />
         {hasFilters && (
           <Button kind="tertiary" size="small" onClick={clearFilters}>
             Clear filters
@@ -301,7 +289,6 @@ export default function BusinessSupportHub() {
           {filtered.length} of {UPDATES.length} updates
         </Text>
       </div>
-
       <div className={styles.tagsRow}>
         <Text type="text3" color="secondary" weight="medium">Tags:</Text>
         {ALL_TAGS.map(tag => {
@@ -321,12 +308,17 @@ export default function BusinessSupportHub() {
           );
         })}
       </div>
+    </>
+  );
 
+  const renderGroups = () => {
+    const hasResults = groupsToRender.some(g => filtered.some(u => u.group === g.key));
+    return (
       <div className={styles.content}>
-        {visibleGroups.map(group => {
+        {groupsToRender.map(group => {
           const items = filtered.filter(u => u.group === group.key);
           if (items.length === 0) return null;
-          const isCollapsed = collapsed[group.key];
+          const isCollapsed = view === 'home' || view === 'search' ? collapsed[group.key] : false;
           return (
             <section key={group.key} className={styles.group}>
               <button
@@ -364,7 +356,7 @@ export default function BusinessSupportHub() {
                       <Text type="text3" color="secondary" weight="medium">Update</Text>
                     </div>
                     <div className={`${styles.headCell} ${styles.priorityCell}`}>
-                      <Text type="text3" color="secondary" weight="medium">Priority</Text>
+                      <Text type="text3" color="secondary" weight="medium">Severity</Text>
                     </div>
                     <div className={styles.headCell}>
                       <Text type="text3" color="secondary" weight="medium">Channel</Text>
@@ -402,6 +394,250 @@ export default function BusinessSupportHub() {
           </div>
         )}
       </div>
+    );
+  };
+
+  return (
+    <div className={styles.root}>
+      <nav className={styles.sidebar} aria-label="Business Support Hub navigation">
+        <div className={styles.sidebarBrand}>
+          <div className={styles.brandIcon} aria-hidden="true">📡</div>
+          <div>
+            <Text type="text2" weight="bold">BS Comm Hub</Text>
+            <Text type="text3" color="secondary">Business Support</Text>
+          </div>
+        </div>
+
+        <div className={styles.sidebarSection}>
+          <Text type="text3" color="secondary" weight="medium">NAVIGATION</Text>
+        </div>
+        <button
+          type="button"
+          className={view === 'home' ? `${styles.navItem} ${styles.navItemActive}` : styles.navItem}
+          onClick={() => setView('home')}
+        >
+          <span className={styles.navEmoji} aria-hidden="true">🏠</span>
+          <span className={styles.navLabel}><Text type="text2">Home</Text></span>
+        </button>
+        <button
+          type="button"
+          className={view === 'search' ? `${styles.navItem} ${styles.navItemActive}` : styles.navItem}
+          onClick={() => setView('search')}
+        >
+          <span className={styles.navEmoji} aria-hidden="true">🔍</span>
+          <span className={styles.navLabel}><Text type="text2">Search</Text></span>
+        </button>
+
+        <div className={styles.sidebarSection}>
+          <Text type="text3" color="secondary" weight="medium">COMMUNICATION TYPES</Text>
+        </div>
+        {GROUPS.map(group => {
+          const count = UPDATES.filter(u => u.group === group.key).length;
+          const active = view === group.key;
+          return (
+            <button
+              type="button"
+              key={group.key}
+              className={active ? `${styles.navItem} ${styles.navItemActive}` : styles.navItem}
+              onClick={() => setView(active ? 'home' : group.key)}
+            >
+              <span className={styles.navEmoji} aria-hidden="true">{group.emoji}</span>
+              <span className={styles.navLabel}>
+                <Text type="text2" ellipsis withoutTooltip>{group.title}</Text>
+              </span>
+              <span className={styles.navCount}>
+                <Text type="text3" color="secondary">{count}</Text>
+              </span>
+            </button>
+          );
+        })}
+      </nav>
+
+      <main className={styles.main}>
+        <div className={styles.mainInner}>
+          {view === 'home' && (
+            <>
+              <div className={styles.hero}>
+                <div className={styles.heroIcon} aria-hidden="true">📡</div>
+                <h1 className={styles.heroTitle}>Business Support Communication Hub</h1>
+                <Text type="text1" color="secondary">
+                  Your centralized hub for all Business Support updates, launches, and communications
+                </Text>
+                <Text type="text3" color="secondary">
+                  Scanning {CHANNELS.length} Slack channels · last scanned {formatDate(SCANNED_AT)} ·
+                  past {SCAN_WINDOW_DAYS} days
+                </Text>
+              </div>
+
+              <div className={styles.statsRow}>
+                {statCards.map(card => {
+                  const active = severityFilter === card.key;
+                  return (
+                    <button
+                      type="button"
+                      key={card.label}
+                      className={
+                        (active ? `${styles.statCard} ${styles.statCardActive} ` : `${styles.statCard} `) +
+                        card.card
+                      }
+                      onClick={() => setSeverityFilter(active || !card.key ? null : card.key)}
+                      aria-pressed={active}
+                      aria-label={`${card.label}: ${card.count} updates`}
+                    >
+                      <span className={styles.statIcon} aria-hidden="true">{card.icon}</span>
+                      <span className={`${styles.statCount} ${card.num}`}>{card.count}</span>
+                      <span className={styles.statLabel}>
+                        {card.label}
+                        {!card.key && hasFilters ? ' · FILTERED' : ''}
+                      </span>
+                    </button>
+                  );
+                })}
+              </div>
+
+              <div className={styles.banner}>
+                <div className={styles.bannerIcon} aria-hidden="true">📊</div>
+                <div className={styles.bannerBody}>
+                  <div className={styles.bannerKicker}>
+                    <span className={styles.liveBadge}>LIVE</span>
+                    <Text type="text3" weight="medium" color="inherit">
+                      WEEKLY INTELLIGENCE — POWERED BY LOUNGE LOGIC
+                    </Text>
+                  </div>
+                  <span className={styles.bannerTitle}>
+                    See What's New, What's Breaking & What You Need to Know
+                  </span>
+                  <Text type="text2" color="inherit">
+                    The Business Lounge Weekly Intelligence Report covers ticket trends, health
+                    score, top topics, and the critical queue — everything you need to stay ahead.
+                  </Text>
+                </div>
+                <Button
+                  kind="primary"
+                  size="small"
+                  onClick={() =>
+                    window.open(
+                      'https://monday.monday.com/boards/18411523320/pulses/12516507016',
+                      '_blank'
+                    )
+                  }
+                >
+                  Open Weekly Report ↗
+                </Button>
+              </div>
+
+              {criticalItem && (
+                <section className={styles.critical} aria-label="Critical updates">
+                  <div className={styles.criticalHeader}>
+                    <div className={styles.criticalHeaderText}>
+                      <span className={styles.criticalKicker}>REQUIRES IMMEDIATE ATTENTION</span>
+                      <Text type="text1" weight="bold">Critical Updates</Text>
+                    </div>
+                    <div className={styles.pager}>
+                      <Text type="text3" color="secondary">
+                        {safeCriticalIndex + 1} / {criticalUpdates.length}
+                      </Text>
+                      <button
+                        type="button"
+                        className={styles.pagerButton}
+                        onClick={() => setCriticalIndex(i => Math.max(0, i - 1))}
+                        disabled={safeCriticalIndex === 0}
+                        aria-label="Previous critical update"
+                      >
+                        ‹
+                      </button>
+                      <button
+                        type="button"
+                        className={styles.pagerButton}
+                        onClick={() =>
+                          setCriticalIndex(i => Math.min(criticalUpdates.length - 1, i + 1))
+                        }
+                        disabled={safeCriticalIndex >= criticalUpdates.length - 1}
+                        aria-label="Next critical update"
+                      >
+                        ›
+                      </button>
+                    </div>
+                  </div>
+                  <div className={styles.criticalBody}>
+                    <div className={styles.criticalIcon} aria-hidden="true">
+                      {criticalGroup?.emoji ?? '⚠️'}
+                    </div>
+                    <div className={styles.criticalContent}>
+                      <div className={styles.badgeRow}>
+                        <span className={styles.criticalBadge}>⛔ CRITICAL</span>
+                        {criticalGroup && (
+                          <Chips label={criticalGroup.title} readOnly size="small" color="explosive" noMargin />
+                        )}
+                        {criticalItem.tags.slice(0, 2).map(tag => (
+                          <Chips key={tag} label={tag} readOnly size="small" color="saladish" noMargin />
+                        ))}
+                      </div>
+                      <Heading type="h2">{criticalItem.title}</Heading>
+                      <Text type="text2" color="secondary">{criticalItem.summary}</Text>
+                      <div className={styles.metaRow}>
+                        <Text type="text3" color="secondary">👤 {criticalItem.author}</Text>
+                        <Text type="text3" color="secondary">📅 {formatDate(criticalItem.date)}</Text>
+                        {criticalChannel && (
+                          <Link
+                            text={`#${criticalItem.channel}`}
+                            href={`https://monday.slack.com/archives/${criticalChannel.id}`}
+                          />
+                        )}
+                      </div>
+                    </div>
+                    <Button
+                      kind="secondary"
+                      size="small"
+                      onClick={() => setSeverityFilter('high')}
+                    >
+                      View All Critical
+                    </Button>
+                  </div>
+                  <div className={styles.dots}>
+                    {criticalUpdates.map((u, i) => (
+                      <button
+                        type="button"
+                        key={u.id}
+                        className={i === safeCriticalIndex ? `${styles.dot} ${styles.dotActive}` : styles.dot}
+                        onClick={() => setCriticalIndex(i)}
+                        aria-label={`Go to critical update ${i + 1}`}
+                      />
+                    ))}
+                  </div>
+                </section>
+              )}
+
+              {renderToolbar(true)}
+              {renderGroups()}
+            </>
+          )}
+
+          {view === 'search' && (
+            <>
+              <div className={styles.pageHeader}>
+                <Heading type="h1" weight="bold">Search</Heading>
+              </div>
+              {renderToolbar(true)}
+              {renderGroups()}
+            </>
+          )}
+
+          {view !== 'home' && view !== 'search' && (
+            <>
+              {GROUPS.filter(g => g.key === view).map(group => (
+                <div key={group.key} className={styles.pageHeader}>
+                  <Heading type="h1" weight="bold">
+                    {group.emoji} {group.title}
+                  </Heading>
+                </div>
+              ))}
+              {renderToolbar(true)}
+              {renderGroups()}
+            </>
+          )}
+        </div>
+      </main>
     </div>
   );
 }
