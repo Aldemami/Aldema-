@@ -536,23 +536,53 @@ export default function BusinessSupportHub() {
                     </Text>
                   </div>
                   <span className={styles.bannerTitle}>
-                    Bug Fixes, System Changes & What BizTech Is Working On
+                    Salesforce Weekly Analysis — What Changed & What Shipped
                   </span>
                   <Text type="text2" color="inherit">
-                    Biz Man's Weekly Bug Summary tracks new bugs on the Bug Board — like CSAT
-                    surveys skipping MS projects and SFDC/BigBrain subscription mismatches — with
-                    priorities, owning teams, and fixes in flight.
+                    BizTech's Salesforce Weekly Analysis lands every Friday on the Biztech weekly
+                    Updates board. The latest edition covers July 17–24, 2026.
                   </Text>
                 </div>
                 <Button
                   kind="primary"
                   size="small"
-                  color="positive"
                   onClick={() =>
-                    window.open('https://monday.monday.com/boards/18413186810', '_blank')
+                    window.open(
+                      'https://monday.monday.com/boards/18413186810/pulses/12618256065',
+                      '_blank'
+                    )
                   }
                 >
                   Open Biztech Weekly ↗
+                </Button>
+              </div>
+
+              <div className={`${styles.banner} ${styles.bannerBugs}`}>
+                <div className={styles.bannerIcon} aria-hidden="true">🐞</div>
+                <div className={styles.bannerBody}>
+                  <div className={styles.bannerKicker}>
+                    <span className={styles.bugBadge}>BUGS</span>
+                    <Text type="text3" weight="medium" color="inherit">
+                      WEEKLY BUG SUMMARY — POWERED BY BIZ MAN
+                    </Text>
+                  </div>
+                  <span className={styles.bannerTitle}>
+                    New Bugs, Priorities & Fixes In Flight
+                  </span>
+                  <Text type="text2" color="inherit">
+                    Biz Man's Weekly Bug Summary tracks new bugs raised on the Bug Board — latest
+                    edition: CSAT surveys skipping MS projects (Biz Apps) and SFDC/BigBrain
+                    subscription mismatches blocking Expansion Opps (Payments).
+                  </Text>
+                </div>
+                <Button
+                  kind="primary"
+                  size="small"
+                  onClick={() =>
+                    window.open('https://monday.monday.com/boards/18390417108', '_blank')
+                  }
+                >
+                  Open Bug Board ↗
                 </Button>
               </div>
 
