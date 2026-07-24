@@ -98,7 +98,7 @@
 
 .mainInner {
   width: 100%;
-  max-width: 1040px;
+  max-width: 1280px;
   margin: 0 auto;
   padding: var(--spacing-xl);
   box-sizing: border-box;
@@ -119,18 +119,18 @@
 }
 
 .heroIcon {
-  width: 56px;
-  height: 56px;
+  width: 72px;
+  height: 72px;
   border-radius: var(--border-radius-big);
   background: linear-gradient(135deg, #e3e3ff, #d4c4ff);
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 26px;
+  font-size: 34px;
 }
 
 .heroTitle {
-  font-size: 44px;
+  font-size: 60px;
   font-weight: 700;
   line-height: 1.1;
   margin: 0;
@@ -189,7 +189,7 @@
 }
 
 .statCount {
-  font-size: 34px;
+  font-size: 46px;
   font-weight: 700;
   line-height: 1.1;
 }
@@ -200,7 +200,7 @@
 .statCountFyi { color: #00c875; }
 
 .statLabel {
-  font-size: 11px;
+  font-size: 13px;
   font-weight: 600;
   letter-spacing: 0.08em;
   color: #55555f;
@@ -255,7 +255,7 @@
 }
 
 .bannerTitle {
-  font-size: 20px;
+  font-size: 26px;
   font-weight: 700;
   color: #1c1c30;
 }

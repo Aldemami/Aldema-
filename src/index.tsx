@@ -96,7 +96,7 @@ function UpdateRow({
         <div className={styles.row}>
           <div className={styles.colorBar} style={{ backgroundColor: color }} />
           <div className={styles.cell}>
-            <Text type="text2" weight="medium" ellipsis withoutTooltip>
+            <Text type="text1" weight="medium" ellipsis withoutTooltip>
               {update.title}
             </Text>
           </div>
@@ -121,7 +121,7 @@ function UpdateRow({
       </button>
       {expanded && (
         <div className={styles.rowDetail}>
-          <Text type="text2">{update.summary}</Text>
+          <Text type="text1">{update.summary}</Text>
           <div className={styles.detailTags}>
             {update.tags.map(tag => (
               <Chips
@@ -338,7 +338,7 @@ export default function BusinessSupportHub() {
                   ▾
                 </span>
                 <span className={styles.groupTitle}>
-                  <Heading type="h3">
+                  <Heading type="h2">
                     <span style={{ color: GROUP_COLORS[group.key] }}>
                       {group.emoji} {group.title}
                     </span>
@@ -507,7 +507,7 @@ export default function BusinessSupportHub() {
                   <span className={styles.bannerTitle}>
                     See What's New, What's Breaking & What You Need to Know
                   </span>
-                  <Text type="text2" color="inherit">
+                  <Text type="text1" color="inherit">
                     The Business Lounge Weekly Intelligence Report covers ticket trends, health
                     score, top topics, and the critical queue — everything you need to stay ahead.
                   </Text>
@@ -538,7 +538,7 @@ export default function BusinessSupportHub() {
                   <span className={styles.bannerTitle}>
                     Salesforce Weekly Analysis — What Changed & What Shipped
                   </span>
-                  <Text type="text2" color="inherit">
+                  <Text type="text1" color="inherit">
                     BizTech's Salesforce Weekly Analysis lands every Friday on the Biztech weekly
                     Updates board. The latest edition covers July 17–24, 2026.
                   </Text>
@@ -569,7 +569,7 @@ export default function BusinessSupportHub() {
                   <span className={styles.bannerTitle}>
                     New Bugs, Priorities & Fixes In Flight
                   </span>
-                  <Text type="text2" color="inherit">
+                  <Text type="text1" color="inherit">
                     Biz Man's Weekly Bug Summary tracks new bugs raised on the Bug Board — latest
                     edition: CSAT surveys skipping MS projects (Biz Apps) and SFDC/BigBrain
                     subscription mismatches blocking Expansion Opps (Payments).
@@ -634,7 +634,7 @@ export default function BusinessSupportHub() {
                         ))}
                       </div>
                       <Heading type="h2">{criticalItem.title}</Heading>
-                      <Text type="text2" color="secondary">{criticalItem.summary}</Text>
+                      <Text type="text1" color="secondary">{criticalItem.summary}</Text>
                       <div className={styles.metaRow}>
                         <Text type="text3" color="secondary">👤 {criticalItem.author}</Text>
                         <Text type="text3" color="secondary">📅 {formatDate(criticalItem.date)}</Text>
