@@ -526,6 +526,36 @@ export default function BusinessSupportHub() {
                 </Button>
               </div>
 
+              <div className={`${styles.banner} ${styles.bannerBiztech}`}>
+                <div className={styles.bannerIcon} aria-hidden="true">🎮</div>
+                <div className={styles.bannerBody}>
+                  <div className={styles.bannerKicker}>
+                    <span className={styles.weeklyBadge}>WEEKLY</span>
+                    <Text type="text3" weight="medium" color="inherit">
+                      BIZTECH WEEKLY — POWERED BY BIZ MAN
+                    </Text>
+                  </div>
+                  <span className={styles.bannerTitle}>
+                    Bug Fixes, System Changes & What BizTech Is Working On
+                  </span>
+                  <Text type="text2" color="inherit">
+                    Biz Man's Weekly Bug Summary tracks new bugs on the Bug Board — like CSAT
+                    surveys skipping MS projects and SFDC/BigBrain subscription mismatches — with
+                    priorities, owning teams, and fixes in flight.
+                  </Text>
+                </div>
+                <Button
+                  kind="primary"
+                  size="small"
+                  color="positive"
+                  onClick={() =>
+                    window.open('https://monday.monday.com/boards/18413186810', '_blank')
+                  }
+                >
+                  Open Biztech Weekly ↗
+                </Button>
+              </div>
+
               {criticalItem && (
                 <section className={styles.critical} aria-label="Critical updates">
                   <div className={styles.criticalHeader}>
