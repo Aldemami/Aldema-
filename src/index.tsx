@@ -96,7 +96,7 @@ function UpdateRow({
         <div className={styles.row}>
           <div className={styles.colorBar} style={{ backgroundColor: color }} />
           <div className={styles.cell}>
-            <Text type="text1" weight="medium" ellipsis withoutTooltip>
+            <Text type="text2" weight="medium" ellipsis withoutTooltip>
               {update.title}
             </Text>
           </div>
@@ -267,6 +267,20 @@ export default function BusinessSupportHub() {
             searchable={false}
           />
         </div>
+        <div className={styles.topicFilter}>
+          <Dropdown
+            placeholder="All topics"
+            options={ALL_TAGS.map(tag => ({ label: tag, value: tag }))}
+            value={activeTags.map(tag => ({ label: tag, value: tag }))}
+            onChange={(selected: { label: string; value: string | number }[] | null) =>
+              setActiveTags((selected ?? []).map(s => String(s.value)))
+            }
+            multi
+            multiline={false}
+            size="small"
+            searchable
+          />
+        </div>
         <ButtonGroup
           options={[
             { value: 'all', text: 'All time' },
@@ -289,25 +303,22 @@ export default function BusinessSupportHub() {
           {filtered.length} of {UPDATES.length} updates
         </Text>
       </div>
-      <div className={styles.tagsRow}>
-        <Text type="text3" color="secondary" weight="medium">Tags:</Text>
-        {ALL_TAGS.map(tag => {
-          const active = activeTags.includes(tag);
-          return (
+      {activeTags.length > 0 && (
+        <div className={styles.activeTagsRow}>
+          <Text type="text3" color="secondary" weight="medium">Active topics:</Text>
+          {activeTags.map(tag => (
             <Chips
               key={tag}
               label={tag}
-              readOnly
               size="small"
-              color={active ? 'primary' : 'explosive'}
+              color="primary"
               noMargin
-              onClick={() => toggleTag(tag)}
-              aria-label={`Filter by tag ${tag}`}
-              className={styles.clickableChip}
+              onDelete={() => toggleTag(tag)}
+              closeButtonAriaLabel={`Remove topic ${tag}`}
             />
-          );
-        })}
-      </div>
+          ))}
+        </div>
+      )}
     </>
   );
 
@@ -338,14 +349,17 @@ export default function BusinessSupportHub() {
                   ▾
                 </span>
                 <span className={styles.groupTitle}>
-                  <Heading type="h2">
-                    <span style={{ color: GROUP_COLORS[group.key] }}>
-                      {group.emoji} {group.title}
-                    </span>
-                  </Heading>
-                  <Text type="text3" color="secondary">
-                    {items.length} {items.length === 1 ? 'update' : 'updates'}
-                  </Text>
+                  <span
+                    className={styles.groupDot}
+                    style={{ backgroundColor: GROUP_COLORS[group.key] }}
+                    aria-hidden="true"
+                  />
+                  <Heading type="h3" weight="bold">{group.title}</Heading>
+                  <span className={styles.countPill}>
+                    <Text type="text3" color="secondary">
+                      {items.length} {items.length === 1 ? 'update' : 'updates'}
+                    </Text>
+                  </span>
                 </span>
               </button>
               {!isCollapsed && (

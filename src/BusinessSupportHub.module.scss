@@ -35,7 +35,7 @@
   width: 34px;
   height: 34px;
   border-radius: var(--border-radius-small);
-  background: linear-gradient(135deg, #6c6cff, #b16cff);
+  background: linear-gradient(135deg, #007f9b, #00c875);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -112,17 +112,19 @@
 .hero {
   display: flex;
   flex-direction: column;
-  align-items: center;
+  align-items: flex-start;
   gap: var(--spacing-small);
-  text-align: center;
-  padding-top: var(--spacing-large);
+  text-align: start;
+  padding-top: var(--spacing-medium);
+  border-bottom: 1px solid var(--ui-border-color);
+  padding-bottom: var(--spacing-large);
 }
 
 .heroIcon {
   width: 72px;
   height: 72px;
   border-radius: var(--border-radius-big);
-  background: linear-gradient(135deg, #e3e3ff, #d4c4ff);
+  background: linear-gradient(135deg, #d6f2f5, #d1f5e4);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -134,7 +136,7 @@
   font-weight: 700;
   line-height: 1.1;
   margin: 0;
-  background: linear-gradient(90deg, #6c6cff, #b16cff);
+  background: linear-gradient(90deg, #006d85, #00b96b);
   -webkit-background-clip: text;
   background-clip: text;
   -webkit-text-fill-color: transparent;
@@ -172,10 +174,10 @@
   box-shadow: var(--box-shadow-medium);
 }
 
-.statTotal { background: linear-gradient(160deg, #ececff, #e4e0ff); }
-.statCritical { background: linear-gradient(160deg, #ffeaee, #ffe3ea); }
-.statImportant { background: linear-gradient(160deg, #fff2e2, #ffecd9); }
-.statFyi { background: linear-gradient(160deg, #e5f8ef, #ddf5ea); }
+.statTotal { background: linear-gradient(160deg, #dff4f7, #d3f0f4); }
+.statCritical { background: linear-gradient(160deg, #ffe8e2, #ffdfd8); }
+.statImportant { background: linear-gradient(160deg, #fff4d9, #ffefc9); }
+.statFyi { background: linear-gradient(160deg, #e0f7ec, #d5f4e5); }
 
 .statIcon {
   width: 34px;
@@ -194,9 +196,9 @@
   line-height: 1.1;
 }
 
-.statCountTotal { color: #6c6cff; }
-.statCountCritical { color: #e2445c; }
-.statCountImportant { color: #fdab3d; }
+.statCountTotal { color: #007f9b; }
+.statCountCritical { color: #ff6b57; }
+.statCountImportant { color: #e8a300; }
 .statCountFyi { color: #00c875; }
 
 .statLabel {
@@ -210,7 +212,7 @@
 
 .banner {
   border-radius: var(--border-radius-big);
-  background: linear-gradient(120deg, #dcdcff, #cfd7ff);
+  background: linear-gradient(120deg, #d3eef2, #cdeee0);
   padding: var(--spacing-large);
   display: flex;
   align-items: center;
@@ -245,7 +247,7 @@
 }
 
 .liveBadge {
-  background-color: #e2445c;
+  background-color: #ff6b57;
   color: #ffffff;
   font-size: 10px;
   font-weight: 700;
@@ -261,11 +263,11 @@
 }
 
 .bannerBiztech {
-  background: linear-gradient(120deg, #ffe9d6, #ffdfd1);
+  background: linear-gradient(120deg, #fff0d1, #ffe9bd);
 }
 
 .bannerBugs {
-  background: linear-gradient(120deg, #ddf5ec, #d2f0e6);
+  background: linear-gradient(120deg, #e2f2ff, #d5ecff);
 }
 
 .bugBadge {
@@ -291,9 +293,9 @@
 /* ---------- Critical carousel ---------- */
 
 .critical {
-  border: 1px solid #ffd4dc;
+  border: 1px solid #ffd7cd;
   border-radius: var(--border-radius-big);
-  background: linear-gradient(180deg, #fff5f7, var(--secondary-background-color) 60px);
+  background: linear-gradient(180deg, #fff4f0, var(--secondary-background-color) 60px);
   overflow: hidden;
 }
 
@@ -302,7 +304,7 @@
   align-items: center;
   gap: var(--spacing-small);
   padding: var(--spacing-medium) var(--spacing-large);
-  border-bottom: 1px solid #ffd4dc;
+  border-bottom: 1px solid #ffd7cd;
 }
 
 .criticalHeaderText {
@@ -313,7 +315,7 @@
 }
 
 .criticalKicker {
-  color: #e2445c;
+  color: #ff6b57;
   font-size: 11px;
   font-weight: 700;
   letter-spacing: 0.08em;
@@ -329,13 +331,13 @@
   width: 28px;
   height: 28px;
   border-radius: 50%;
-  border: 1px solid #ffd4dc;
+  border: 1px solid #ffd7cd;
   background-color: var(--secondary-background-color);
   cursor: pointer;
   display: flex;
   align-items: center;
   justify-content: center;
-  color: #e2445c;
+  color: #ff6b57;
 }
 
 .pagerButton:disabled {
@@ -378,7 +380,7 @@
 }
 
 .criticalBadge {
-  background-color: #e2445c;
+  background-color: #ff6b57;
   color: #ffffff;
   font-size: 10px;
   font-weight: 700;
@@ -405,7 +407,7 @@
   width: 7px;
   height: 7px;
   border-radius: 4px;
-  background-color: #ffd4dc;
+  background-color: #ffd7cd;
   border: none;
   padding: 0;
   cursor: pointer;
@@ -414,7 +416,7 @@
 
 .dotActive {
   width: 18px;
-  background-color: #e2445c;
+  background-color: #ff6b57;
 }
 
 /* ---------- Toolbar / filters ---------- */
@@ -438,7 +440,11 @@
   flex: 1;
 }
 
-.tagsRow {
+.topicFilter {
+  width: 220px;
+}
+
+.activeTagsRow {
   display: flex;
   align-items: center;
   flex-wrap: wrap;
@@ -487,21 +493,35 @@
 
 .groupTitle {
   display: flex;
-  align-items: baseline;
+  align-items: center;
   gap: var(--spacing-small);
+}
+
+.groupDot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+.countPill {
+  background-color: var(--primary-background-hover-color);
+  border-radius: 12px;
+  padding: 1px 10px;
 }
 
 .table {
   border: 1px solid var(--ui-border-color);
-  border-radius: var(--border-radius-medium);
+  border-radius: var(--border-radius-big);
   overflow: hidden;
   background-color: var(--secondary-background-color);
+  box-shadow: 0 1px 3px rgba(29, 45, 66, 0.06);
 }
 
 .tableHeadRow,
 .row {
   display: grid;
-  grid-template-columns: 6px minmax(220px, 2.2fr) 110px 200px 170px 80px;
+  grid-template-columns: 4px minmax(220px, 2.2fr) 110px 200px 170px 90px;
   align-items: center;
 }
 
@@ -511,7 +531,10 @@
 }
 
 .headCell {
-  padding: var(--spacing-xs) var(--spacing-small);
+  padding: var(--spacing-xs) var(--spacing-medium);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  font-size: 11px;
 }
 
 .rowButton {
@@ -538,7 +561,7 @@
 }
 
 .cell {
-  padding: var(--spacing-small);
+  padding: var(--spacing-small) var(--spacing-medium);
   min-width: 0;
   display: flex;
   align-items: center;
@@ -589,7 +612,7 @@
 
   .tableHeadRow,
   .row {
-    grid-template-columns: 6px minmax(180px, 1fr) 150px 130px;
+    grid-template-columns: 4px minmax(180px, 1fr) 150px 130px;
   }
 
   .dateHeadCell,
