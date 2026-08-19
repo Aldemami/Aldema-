@@ -11,7 +11,6 @@ import {
   Avatar,
   Link,
   Button,
-  ButtonGroup,
 } from '@vibe/core';
 import styles from './BusinessSupportHub.module.scss';
 import {
@@ -33,6 +32,21 @@ const GROUP_COLORS: Record<GroupKey, string> = {
   policy: 'var(--color-bright-blue)',
   reports: 'var(--color-purple)',
   techUpdates: 'var(--color-chili-blue)',
+};
+
+const GROUP_ART: Record<GroupKey, string> = {
+  releases: 'linear-gradient(135deg, #e3f7ec, #d2f3e0)',
+  incidents: 'linear-gradient(135deg, #ffefe9, #ffe4dc)',
+  maintenance: 'linear-gradient(135deg, #fff4dc, #ffedc7)',
+  policy: 'linear-gradient(135deg, #e4f1fb, #d7eaf9)',
+  reports: 'linear-gradient(135deg, #efeafa, #e5ddf7)',
+  techUpdates: 'linear-gradient(135deg, #e0f4f6, #d4f0f3)',
+};
+
+const SEVERITY_BAR: Record<Priority, string> = {
+  high: '#ff6b57',
+  medium: '#e8a300',
+  low: '#00c875',
 };
 
 // Severity labels follow the comm-hub convention: Critical / Important / FYI.
@@ -75,77 +89,65 @@ interface ChannelOption extends Record<string, unknown> {
   value: string;
 }
 
-function UpdateRow({
+function UpdateCard({
   update,
-  color,
-  expanded,
-  onToggle,
   onTagClick,
 }: {
   update: TeamUpdate;
-  color: string;
-  expanded: boolean;
-  onToggle: () => void;
   onTagClick: (tag: string) => void;
 }) {
   const channel = CHANNELS.find(c => c.name === update.channel);
+  const group = GROUPS.find(g => g.key === update.group);
   const severity = SEVERITY[update.priority];
   return (
-    <>
-      <button type="button" className={styles.rowButton} onClick={onToggle} aria-expanded={expanded}>
-        <div className={styles.row}>
-          <div className={styles.colorBar} style={{ backgroundColor: color }} />
-          <div className={styles.cell}>
-            <Text type="text2" weight="medium" ellipsis withoutTooltip>
-              {update.title}
-            </Text>
-          </div>
-          <div className={`${styles.cell} ${styles.priorityCell}`}>
-            <Chips label={severity.label} readOnly size="small" color={severity.chip as never} noMargin />
-          </div>
-          <div className={styles.cell}>
-            <Chips label={`#${update.channel}`} readOnly size="small" color="explosive" noMargin />
-          </div>
-          <div className={`${styles.cell} ${styles.authorCell}`}>
-            <Avatar type="text" text={initials(update.author)} size="small" aria-label={update.author} />
-            <Text type="text3" color="secondary" ellipsis withoutTooltip>
-              {update.author}
-            </Text>
-          </div>
-          <div className={`${styles.cell} ${styles.dateCell}`}>
-            <Text type="text3" color="secondary">
-              {formatDate(update.date).replace(', 2026', '')}
-            </Text>
-          </div>
+    <article className={styles.card}>
+      <div
+        className={styles.cardTopBar}
+        style={{ backgroundColor: SEVERITY_BAR[update.priority] }}
+      />
+      <div className={styles.cardArt} style={{ background: GROUP_ART[update.group] }} aria-hidden="true">
+        {group?.emoji}
+      </div>
+      <div className={styles.cardBody}>
+        <div className={styles.cardBadges}>
+          <Chips label={severity.label} readOnly size="small" color={severity.chip as never} noMargin />
+          {group && <Chips label={group.title} readOnly size="small" color="explosive" noMargin />}
         </div>
-      </button>
-      {expanded && (
-        <div className={styles.rowDetail}>
-          <Text type="text1">{update.summary}</Text>
-          <div className={styles.detailTags}>
-            {update.tags.map(tag => (
-              <Chips
-                key={tag}
-                label={tag}
-                readOnly
-                size="small"
-                color="river"
-                noMargin
-                onClick={() => onTagClick(tag)}
-                aria-label={`Filter by tag ${tag}`}
-                className={styles.clickableChip}
-              />
-            ))}
-          </div>
-          {channel && (
-            <Link
-              text={`Open #${update.channel} in Slack`}
-              href={`https://monday.slack.com/archives/${channel.id}`}
+        <Text type="text1" weight="bold">{update.title}</Text>
+        <div className={styles.cardMeta}>
+          <Avatar type="text" text={initials(update.author)} size="small" aria-label={update.author} />
+          <Text type="text3" color="secondary">{update.author}</Text>
+          <Text type="text3" color="secondary">· {formatDate(update.date)}</Text>
+        </div>
+        <Text type="text2" color="secondary" maxLines={3} withoutTooltip>
+          {update.summary}
+        </Text>
+        <div className={styles.cardTags}>
+          {update.tags.map(tag => (
+            <Chips
+              key={tag}
+              label={tag}
+              readOnly
+              size="small"
+              color="river"
+              noMargin
+              onClick={() => onTagClick(tag)}
+              aria-label={`Filter by topic ${tag}`}
+              className={styles.clickableChip}
             />
-          )}
+          ))}
         </div>
-      )}
-    </>
+      </div>
+      <div className={styles.cardFooter}>
+        <Text type="text3" color="secondary">#{update.channel}</Text>
+        {channel && (
+          <Link
+            text="View ›"
+            href={`https://monday.slack.com/archives/${channel.id}`}
+          />
+        )}
+      </div>
+    </article>
   );
 }
 
@@ -156,8 +158,7 @@ export default function BusinessSupportHub() {
   const [severityFilter, setSeverityFilter] = useState<Priority | null>(null);
   const [range, setRange] = useState<RangeKey>('all');
   const [activeTags, setActiveTags] = useState<string[]>([]);
-  const [collapsed, setCollapsed] = useState<Record<string, boolean>>({});
-  const [expandedRow, setExpandedRow] = useState<string | null>(null);
+  const [newestFirst, setNewestFirst] = useState(true);
   const [criticalIndex, setCriticalIndex] = useState(0);
 
   const channelOptions: ChannelOption[] = useMemo(
@@ -174,6 +175,7 @@ export default function BusinessSupportHub() {
     const channels = channelFilter.map(o => o.value);
     const maxDays = RANGE_DAYS[range];
     return UPDATES.filter(u => {
+      if (view !== 'home' && view !== 'search' && u.group !== view) return false;
       if (maxDays !== null && daysAgo(u.date) >= maxDays) return false;
       if (channels.length > 0 && !channels.includes(u.channel)) return false;
       if (severityFilter && u.priority !== severityFilter) return false;
@@ -186,14 +188,10 @@ export default function BusinessSupportHub() {
         u.channel.toLowerCase().includes(q) ||
         u.tags.some(t => t.toLowerCase().includes(q))
       );
-    }).sort((a, b) => {
-      if (a.priority !== b.priority) {
-        const order: Priority[] = ['high', 'medium', 'low'];
-        return order.indexOf(a.priority) - order.indexOf(b.priority);
-      }
-      return b.date.localeCompare(a.date);
-    });
-  }, [query, channelFilter, severityFilter, range, activeTags]);
+    }).sort((a, b) =>
+      newestFirst ? b.date.localeCompare(a.date) : a.date.localeCompare(b.date)
+    );
+  }, [view, query, channelFilter, severityFilter, range, activeTags, newestFirst]);
 
   const counts = useMemo(
     () => ({
@@ -228,8 +226,19 @@ export default function BusinessSupportHub() {
     setActiveTags([]);
   };
 
-  const groupsToRender =
-    view === 'home' || view === 'search' ? GROUPS : GROUPS.filter(g => g.key === view);
+  const RANGE_LABELS: Record<RangeKey, string> = {
+    all: 'All Updates',
+    month: 'This Month',
+    week: 'This Week',
+    day: 'Today',
+  };
+
+  const SEVERITY_PILLS: { key: Priority | null; label: string }[] = [
+    { key: null, label: 'All' },
+    { key: 'high', label: 'Critical' },
+    { key: 'medium', label: 'Important' },
+    { key: 'low', label: 'FYI' },
+  ];
 
   const statCards = [
     { key: null, label: 'TOTAL UPDATES', icon: '✨', count: counts.total, card: styles.statTotal, num: styles.statCountTotal },
@@ -238,178 +247,127 @@ export default function BusinessSupportHub() {
     { key: 'low' as Priority, label: 'FYI', icon: 'ℹ️', count: counts.fyi, card: styles.statFyi, num: styles.statCountFyi },
   ];
 
-  const renderToolbar = (withSearch: boolean) => (
-    <>
-      <div className={styles.toolbar}>
-        {withSearch && (
-          <div className={styles.search}>
-            <Search
-              placeholder="Search updates…"
-              value={query}
-              onChange={(value: string) => setQuery(value)}
-              size="small"
-            />
-          </div>
-        )}
-        <div className={styles.channelFilter}>
-          <Dropdown
-            placeholder="All channels"
-            options={channelOptions}
-            value={channelFilter}
-            onChange={(selected: { label: string; value: string | number }[] | null) =>
-              setChannelFilter(
-                (selected ?? []).map(s => ({ label: s.label, value: String(s.value) }))
-              )
-            }
-            multi
-            multiline={false}
-            size="small"
-            searchable={false}
-          />
-        </div>
-        <div className={styles.topicFilter}>
-          <Dropdown
-            placeholder="All topics"
-            options={ALL_TAGS.map(tag => ({ label: tag, value: tag }))}
-            value={activeTags.map(tag => ({ label: tag, value: tag }))}
-            onChange={(selected: { label: string; value: string | number }[] | null) =>
-              setActiveTags((selected ?? []).map(s => String(s.value)))
-            }
-            multi
-            multiline={false}
-            size="small"
-            searchable
-          />
-        </div>
-        <ButtonGroup
-          options={[
-            { value: 'all', text: 'All time' },
-            { value: 'month', text: 'Month' },
-            { value: 'week', text: 'Week' },
-            { value: 'day', text: 'Today' },
-          ]}
-          value={range}
-          onSelect={(value: string | number) => setRange(value as RangeKey)}
+  const currentGroup = GROUPS.find(g => g.key === view);
+
+  const renderFilterBar = () => (
+    <div className={styles.toolbar}>
+      <div className={styles.search}>
+        <Search
+          placeholder="Search updates…"
+          value={query}
+          onChange={(value: string) => setQuery(value)}
           size="small"
-          kind="tertiary"
         />
-        {hasFilters && (
-          <Button kind="tertiary" size="small" onClick={clearFilters}>
+      </div>
+      <div className={styles.channelFilter}>
+        <Dropdown
+          placeholder="All channels"
+          options={channelOptions}
+          value={channelFilter}
+          onChange={(selected: { label: string; value: string | number }[] | null) =>
+            setChannelFilter(
+              (selected ?? []).map(o => ({ label: o.label, value: String(o.value) }))
+            )
+          }
+          multi
+          multiline={false}
+          size="small"
+          searchable={false}
+        />
+      </div>
+      <div className={styles.topicFilter}>
+        <Dropdown
+          placeholder="All topics"
+          options={ALL_TAGS.map(tag => ({ label: tag, value: tag }))}
+          value={activeTags.map(tag => ({ label: tag, value: tag }))}
+          onChange={(selected: { label: string; value: string | number }[] | null) =>
+            setActiveTags((selected ?? []).map(o => String(o.value)))
+          }
+          multi
+          multiline={false}
+          size="small"
+          searchable
+        />
+      </div>
+      <Button kind="secondary" size="small" onClick={() => setNewestFirst(v => !v)}>
+        {newestFirst ? '↓ Newest' : '↑ Oldest'}
+      </Button>
+      {hasFilters && (
+        <Button kind="tertiary" size="small" onClick={clearFilters}>
+          Clear
+        </Button>
+      )}
+    </div>
+  );
+
+  const renderPills = () => (
+    <>
+      <div className={styles.pillRow}>
+        <span className={styles.pillLabel}>
+          <Text type="text3" color="secondary" weight="medium">Period:</Text>
+        </span>
+        {(Object.keys(RANGE_LABELS) as RangeKey[]).map(key => (
+          <button
+            type="button"
+            key={key}
+            className={range === key ? `${styles.pill} ${styles.pillActive}` : styles.pill}
+            onClick={() => setRange(key)}
+            aria-pressed={range === key}
+          >
+            {key === 'all' ? 'All Time' : RANGE_LABELS[key]}
+          </button>
+        ))}
+      </div>
+      <div className={styles.pillRow}>
+        <span className={styles.pillLabel}>
+          <Text type="text3" color="secondary" weight="medium">Urgency:</Text>
+        </span>
+        {SEVERITY_PILLS.map(pill => (
+          <button
+            type="button"
+            key={pill.label}
+            className={
+              severityFilter === pill.key ? `${styles.pill} ${styles.pillActive}` : styles.pill
+            }
+            onClick={() => setSeverityFilter(pill.key)}
+            aria-pressed={severityFilter === pill.key}
+          >
+            {pill.label}
+          </button>
+        ))}
+      </div>
+    </>
+  );
+
+  const renderCards = () => (
+    <>
+      <div className={styles.sectionHead}>
+        <h2 className={styles.sectionTitle}>
+          {currentGroup ? currentGroup.title : RANGE_LABELS[range]}
+        </h2>
+        <span className={styles.countPill}>
+          <Text type="text3" color="secondary">
+            {filtered.length} {filtered.length === 1 ? 'update' : 'updates'}
+          </Text>
+        </span>
+      </div>
+      {renderPills()}
+      {filtered.length > 0 ? (
+        <div className={styles.cardGrid}>
+          {filtered.map(update => (
+            <UpdateCard key={update.id} update={update} onTagClick={toggleTag} />
+          ))}
+        </div>
+      ) : (
+        <div className={styles.empty}>
+          <Text type="text1" weight="medium">No updates match your filters</Text>
+          <Button kind="secondary" size="small" onClick={clearFilters}>
             Clear filters
           </Button>
-        )}
-        <div className={styles.toolbarSpacer} />
-        <Text type="text3" color="secondary">
-          {filtered.length} of {UPDATES.length} updates
-        </Text>
-      </div>
-      {activeTags.length > 0 && (
-        <div className={styles.activeTagsRow}>
-          <Text type="text3" color="secondary" weight="medium">Active topics:</Text>
-          {activeTags.map(tag => (
-            <Chips
-              key={tag}
-              label={tag}
-              size="small"
-              color="primary"
-              noMargin
-              onDelete={() => toggleTag(tag)}
-              closeButtonAriaLabel={`Remove topic ${tag}`}
-            />
-          ))}
         </div>
       )}
     </>
   );
-
-  const renderGroups = () => {
-    const hasResults = groupsToRender.some(g => filtered.some(u => u.group === g.key));
-    return (
-      <div className={styles.content}>
-        {groupsToRender.map(group => {
-          const items = filtered.filter(u => u.group === group.key);
-          if (items.length === 0) return null;
-          const isCollapsed = view === 'home' || view === 'search' ? collapsed[group.key] : false;
-          return (
-            <section key={group.key} className={styles.group}>
-              <button
-                type="button"
-                className={styles.groupHeader}
-                onClick={() => setCollapsed(prev => ({ ...prev, [group.key]: !prev[group.key] }))}
-                aria-expanded={!isCollapsed}
-              >
-                <span
-                  className={
-                    isCollapsed
-                      ? `${styles.groupChevron} ${styles.groupChevronCollapsed}`
-                      : styles.groupChevron
-                  }
-                  aria-hidden="true"
-                >
-                  ▾
-                </span>
-                <span className={styles.groupTitle}>
-                  <span
-                    className={styles.groupDot}
-                    style={{ backgroundColor: GROUP_COLORS[group.key] }}
-                    aria-hidden="true"
-                  />
-                  <Heading type="h3" weight="bold">{group.title}</Heading>
-                  <span className={styles.countPill}>
-                    <Text type="text3" color="secondary">
-                      {items.length} {items.length === 1 ? 'update' : 'updates'}
-                    </Text>
-                  </span>
-                </span>
-              </button>
-              {!isCollapsed && (
-                <div className={styles.table}>
-                  <div className={styles.tableHeadRow}>
-                    <div />
-                    <div className={styles.headCell}>
-                      <Text type="text3" color="secondary" weight="medium">Update</Text>
-                    </div>
-                    <div className={`${styles.headCell} ${styles.priorityCell}`}>
-                      <Text type="text3" color="secondary" weight="medium">Severity</Text>
-                    </div>
-                    <div className={styles.headCell}>
-                      <Text type="text3" color="secondary" weight="medium">Channel</Text>
-                    </div>
-                    <div className={styles.headCell}>
-                      <Text type="text3" color="secondary" weight="medium">Posted by</Text>
-                    </div>
-                    <div className={`${styles.headCell} ${styles.dateHeadCell}`}>
-                      <Text type="text3" color="secondary" weight="medium">Date</Text>
-                    </div>
-                  </div>
-                  {items.map(update => (
-                    <UpdateRow
-                      key={update.id}
-                      update={update}
-                      color={GROUP_COLORS[group.key]}
-                      expanded={expandedRow === update.id}
-                      onToggle={() =>
-                        setExpandedRow(prev => (prev === update.id ? null : update.id))
-                      }
-                      onTagClick={toggleTag}
-                    />
-                  ))}
-                </div>
-              )}
-            </section>
-          );
-        })}
-        {!hasResults && (
-          <div className={styles.empty}>
-            <Text type="text1" weight="medium">No updates match your filters</Text>
-            <Button kind="secondary" size="small" onClick={clearFilters}>
-              Clear filters
-            </Button>
-          </div>
-        )}
-      </div>
-    );
-  };
 
   return (
     <div className={styles.root}>
@@ -479,7 +437,7 @@ export default function BusinessSupportHub() {
                 </Text>
                 <Text type="text3" color="secondary">
                   Scanning {CHANNELS.length} Slack channels · last scanned {formatDate(SCANNED_AT)} ·
-                  past {SCAN_WINDOW_DAYS} days
+                  past {SCAN_WINDOW_DAYS} days · refreshed daily
                 </Text>
               </div>
 
@@ -500,10 +458,7 @@ export default function BusinessSupportHub() {
                     >
                       <span className={styles.statIcon} aria-hidden="true">{card.icon}</span>
                       <span className={`${styles.statCount} ${card.num}`}>{card.count}</span>
-                      <span className={styles.statLabel}>
-                        {card.label}
-                        {!card.key && hasFilters ? ' · FILTERED' : ''}
-                      </span>
+                      <span className={styles.statLabel}>{card.label}</span>
                     </button>
                   );
                 })}
@@ -660,11 +615,7 @@ export default function BusinessSupportHub() {
                         )}
                       </div>
                     </div>
-                    <Button
-                      kind="secondary"
-                      size="small"
-                      onClick={() => setSeverityFilter('high')}
-                    >
+                    <Button kind="secondary" size="small" onClick={() => setSeverityFilter('high')}>
                       View All Critical
                     </Button>
                   </div>
@@ -682,32 +633,20 @@ export default function BusinessSupportHub() {
                 </section>
               )}
 
-              {renderToolbar(true)}
-              {renderGroups()}
+              {renderFilterBar()}
+              {renderCards()}
             </>
           )}
 
-          {view === 'search' && (
+          {view !== 'home' && (
             <>
               <div className={styles.pageHeader}>
-                <Heading type="h1" weight="bold">Search</Heading>
+                <Heading type="h1" weight="bold">
+                  {view === 'search' ? '🔍 Search' : `${currentGroup?.emoji} ${currentGroup?.title}`}
+                </Heading>
               </div>
-              {renderToolbar(true)}
-              {renderGroups()}
-            </>
-          )}
-
-          {view !== 'home' && view !== 'search' && (
-            <>
-              {GROUPS.filter(g => g.key === view).map(group => (
-                <div key={group.key} className={styles.pageHeader}>
-                  <Heading type="h1" weight="bold">
-                    {group.emoji} {group.title}
-                  </Heading>
-                </div>
-              ))}
-              {renderToolbar(true)}
-              {renderGroups()}
+              {renderFilterBar()}
+              {renderCards()}
             </>
           )}
         </div>

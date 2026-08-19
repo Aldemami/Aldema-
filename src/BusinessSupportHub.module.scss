@@ -112,12 +112,10 @@
 .hero {
   display: flex;
   flex-direction: column;
-  align-items: flex-start;
+  align-items: center;
   gap: var(--spacing-small);
-  text-align: start;
-  padding-top: var(--spacing-medium);
-  border-bottom: 1px solid var(--ui-border-color);
-  padding-bottom: var(--spacing-large);
+  text-align: center;
+  padding-top: var(--spacing-large);
 }
 
 .heroIcon {
@@ -426,10 +424,135 @@
   align-items: center;
   gap: var(--spacing-small);
   flex-wrap: wrap;
+  background-color: var(--secondary-background-color);
+  border: 1px solid var(--ui-border-color);
+  border-radius: var(--border-radius-big);
+  padding: var(--spacing-medium);
+  box-shadow: 0 1px 3px rgba(29, 45, 66, 0.06);
 }
 
 .search {
-  width: 280px;
+  flex: 1;
+  min-width: 220px;
+}
+
+.sectionHead {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-small);
+}
+
+.sectionTitle {
+  font-size: 34px;
+  font-weight: 700;
+  margin: 0;
+  color: var(--primary-text-color);
+}
+
+.pillRow {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-xs);
+  flex-wrap: wrap;
+}
+
+.pillLabel {
+  margin-inline-end: var(--spacing-xs);
+}
+
+.pill {
+  border: 1px solid var(--ui-border-color);
+  background-color: var(--secondary-background-color);
+  border-radius: 8px;
+  padding: 5px 14px;
+  cursor: pointer;
+  font-size: 14px;
+  color: var(--primary-text-color);
+}
+
+.pill:hover {
+  background-color: var(--primary-background-hover-color);
+}
+
+.pillActive {
+  background-color: #007f9b;
+  border-color: #007f9b;
+  color: #ffffff;
+}
+
+/* ---------- Card grid ---------- */
+
+.cardGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: var(--spacing-medium);
+}
+
+.card {
+  display: flex;
+  flex-direction: column;
+  background-color: var(--secondary-background-color);
+  border: 1px solid var(--ui-border-color);
+  border-radius: var(--border-radius-big);
+  overflow: hidden;
+  box-shadow: 0 1px 3px rgba(29, 45, 66, 0.06);
+  transition: box-shadow 0.15s ease, transform 0.15s ease;
+}
+
+.card:hover {
+  box-shadow: var(--box-shadow-medium);
+  transform: translateY(-2px);
+}
+
+.cardTopBar {
+  height: 5px;
+}
+
+.cardArt {
+  height: 110px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 44px;
+}
+
+.cardBody {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-xs);
+  padding: var(--spacing-medium);
+  flex: 1;
+}
+
+.cardBadges {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: var(--spacing-xs);
+}
+
+.cardMeta {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-xs);
+  flex-wrap: wrap;
+}
+
+.cardTags {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: var(--spacing-xs);
+}
+
+.cardFooter {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--spacing-small);
+  padding: var(--spacing-small) var(--spacing-medium);
+  border-top: 1px solid var(--ui-border-color);
+  background-color: var(--primary-background-color);
 }
 
 .channelFilter {
