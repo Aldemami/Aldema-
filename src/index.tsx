@@ -41,6 +41,23 @@ const GROUP_ART: Record<GroupKey, string> = {
   techUpdates: 'linear-gradient(135deg, #e0f4f6, #d4f0f3)',
 };
 
+const DOMAINS: { label: string; icon: string; bg: string; tag: string }[] = [
+  { label: 'monday CRM', icon: '💼', bg: '#efeafa', tag: 'CRM' },
+  { label: 'monday AI', icon: '✨', bg: '#e4f1fb', tag: 'AI' },
+  { label: 'AI Credits', icon: '🪙', bg: '#fff4dc', tag: 'AI Credits' },
+  { label: 'CPQ', icon: '🧾', bg: '#e3f7ec', tag: 'CPQ' },
+  { label: 'Salesforce', icon: '☁️', bg: '#e0f4f6', tag: 'Salesforce' },
+  { label: 'Renewals', icon: '🔄', bg: '#e3f7ec', tag: 'Renewals' },
+  { label: 'RevOps', icon: '📈', bg: '#e0f7ec', tag: 'RevOps' },
+  { label: 'Opt Outs', icon: '📤', bg: '#ffefe9', tag: 'Opt Outs' },
+  { label: 'Process', icon: '📋', bg: '#e4f1fb', tag: 'Process' },
+  { label: 'Incentives', icon: '🏆', bg: '#fff4dc', tag: 'Incentives' },
+  { label: 'Systems', icon: '🖥️', bg: '#efeafa', tag: 'Systems' },
+  { label: 'Tooling', icon: '🛠️', bg: '#e0f4f6', tag: 'Tooling' },
+  { label: 'Enablement', icon: '🎓', bg: '#ffefe9', tag: 'Enablement' },
+  { label: 'Workarounds', icon: '🩹', bg: '#fff4dc', tag: 'Workaround' },
+];
+
 const SEVERITY_BAR: Record<Priority, string> = {
   high: '#ff6b57',
   medium: '#e8a300',
@@ -630,6 +647,43 @@ export default function BusinessSupportHub() {
                   </div>
                 </section>
               )}
+
+              <section className={styles.domains} aria-label="Browse by domain">
+                <div className={styles.domainsHeader}>
+                  <div className={styles.domainsHeaderIcon} aria-hidden="true">📊</div>
+                  <div>
+                    <h2 className={styles.domainsTitle}>Browse by Domain</h2>
+                    <Text type="text3" color="secondary">Explore updates by product domain</Text>
+                  </div>
+                </div>
+                <div className={styles.domainGrid}>
+                  {DOMAINS.map(domain => {
+                    const active = activeTags.includes(domain.tag);
+                    return (
+                      <button
+                        type="button"
+                        key={domain.label}
+                        className={
+                          active
+                            ? `${styles.domainTile} ${styles.domainTileActive}`
+                            : styles.domainTile
+                        }
+                        onClick={() => toggleTag(domain.tag)}
+                        aria-pressed={active}
+                      >
+                        <span
+                          className={styles.domainTileIcon}
+                          style={{ backgroundColor: domain.bg }}
+                          aria-hidden="true"
+                        >
+                          {domain.icon}
+                        </span>
+                        <Text type="text2" weight="medium">{domain.label}</Text>
+                      </button>
+                    );
+                  })}
+                </div>
+              </section>
 
               {renderFilterBar()}
               {renderCards()}
