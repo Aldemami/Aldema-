@@ -24,7 +24,6 @@ export type GroupKey =
   | 'incidents'
   | 'maintenance'
   | 'policy'
-  | 'reports'
   | 'techUpdates';
 
 export interface Group {
@@ -39,7 +38,6 @@ export const GROUPS: Group[] = [
   { key: 'incidents', emoji: '⚠️', title: 'Incidents & Watch Outs', chipColor: 'stuck-red' },
   { key: 'maintenance', emoji: '🔧', title: 'Maintenance & Downtime', chipColor: 'working_orange' },
   { key: 'policy', emoji: '📋', title: 'Policy & Process Changes', chipColor: 'bright-blue' },
-  { key: 'reports', emoji: '📊', title: 'Weekly Reports & Digests', chipColor: 'purple' },
   { key: 'techUpdates', emoji: '📢', title: 'Updates for Policy or Tech Changes', chipColor: 'teal' },
 ];
 
@@ -67,12 +65,6 @@ const META: Record<string, { tags: string[]; priority: Priority }> = {
   'opt-out-arr-decrease': { tags: ['Opt Outs', 'RevOps', 'Process'], priority: 'medium' },
   'opt-out-hold-off': { tags: ['Opt Outs', 'RevOps', 'Process'], priority: 'high' },
   'q3-ai-credits-spif': { tags: ['SPIF', 'AI Credits', 'Incentives'], priority: 'high' },
-  'bug-board-jul10-17': { tags: ['Bug Board', 'CPQ', 'ARR'], priority: 'medium' },
-  'bug-board-jul7-13': { tags: ['Bug Board', 'CPQ', 'ARR'], priority: 'medium' },
-  'weekly-intel-jul7-13': { tags: ['Intelligence Report', 'Tickets'], priority: 'medium' },
-  'winners-circle-june': { tags: ['Incentives', 'Leaderboard'], priority: 'low' },
-  'madfest-wrap': { tags: ['Events', 'Marketing', 'Leads'], priority: 'low' },
-  'ana-conference-recap': { tags: ['Events', 'Marketing', 'Leads'], priority: 'low' },
   'tof-context-repo': { tags: ['AI', 'Tooling', 'TOF'], priority: 'low' },
   'ai-levels-academy': { tags: ['AI', 'Enablement'], priority: 'low' },
   'codex-credits': { tags: ['AI', 'Tooling'], priority: 'low' },
@@ -158,66 +150,6 @@ const RAW_UPDATES: Omit<TeamUpdate, 'tags' | 'priority'>[] = [
     title: 'Q3 AI Credits SPIF is live',
     summary:
       'Monthly AI Credit subscriptions on the new AI Work Platform earn 5% of AI Credits Added ARR on top of existing incentive plans (July 1 – Sept 30). Required: toggle "Account Should use AI Platform" to TRUE in CPQ or the deal is not included. Track progress on the AI Credits SPIF Dashboard.',
-  },
-  {
-    id: 'bug-board-jul10-17',
-    group: 'reports',
-    channel: 'business-support-internal',
-    author: 'Otis – Lounge Logic Insights',
-    date: '2026-07-17',
-    title: 'Bug Board Update — Week of July 10–17',
-    summary:
-      '3 new bugs: quotes stuck in approval despite being approved (Medium, admin-only workaround); signed Dealroom/SO not emailing managers (Low, no workaround); expansion CC claim not claimable under expansion opps (HIGH, incorrect ARR routing, urgent investigation).',
-  },
-  {
-    id: 'bug-board-jul7-13',
-    group: 'reports',
-    channel: 'business-support-internal',
-    author: 'Otis – Lounge Logic Insights',
-    date: '2026-07-16',
-    title: 'Bug Board Update — Week of July 7–13',
-    summary:
-      '2 new bugs: overlay ARR recognition for Campaigns miscalculated (possibly APJ-specific; manual fix via Yonatan) and a CPQ error blocking quote save/issue when two primary quotes exist (workaround: de-select one as primary).',
-  },
-  {
-    id: 'weekly-intel-jul7-13',
-    group: 'reports',
-    channel: 'business-support-internal',
-    author: 'Otis – Lounge Logic Insights',
-    date: '2026-07-13',
-    title: 'Business Lounge Weekly Intelligence Report — July 7–13',
-    summary:
-      '349 tickets analyzed, health score 7.5/10. Top topics: Change Account Owner (37), SO creation/modification – SFDC CPQ (37), ARR Recognition/Claim (28). 26 Critical tickets in queue.',
-  },
-  {
-    id: 'winners-circle-june',
-    group: 'reports',
-    channel: 'cro-org',
-    author: 'George C.',
-    date: '2026-07-13',
-    title: "June 2026 Winner's Circle standings",
-    summary:
-      "The Winner's Circle leaderboard refreshed: top 10 managers and top 40 ICs announced for the Vietnam May 2027 trip. 172 days left — live rankings on the Winner's Circle dashboard and office TV screens.",
-  },
-  {
-    id: 'madfest-wrap',
-    group: 'reports',
-    channel: 'cro-org',
-    author: 'Beth Young',
-    date: '2026-07-10',
-    title: 'MAD//Fest London wrap-up',
-    summary:
-      '272 booth leads (37 rated 4–5 quality) plus 1k+ leads from the monday bar. Press interviews reaching an estimated 477k+ audience. Next: leads being worked and a Monday for Marketers AI webinar on July 22.',
-  },
-  {
-    id: 'ana-conference-recap',
-    group: 'reports',
-    channel: 'cro-org',
-    author: 'Emani Brown',
-    date: '2026-07-10',
-    title: 'ANA In-House Agency Conference recap',
-    summary:
-      '200+ attendees, 50+ MQLs, connections with Chick-fil-A, Fidelity, Nielsen, LEGO, Allstate and more — plus a meeting booked with Ford. Daniel Brooks joined a mainstage session on running marketing at scale.',
   },
   {
     id: 'tof-context-repo',

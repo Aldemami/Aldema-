@@ -30,7 +30,6 @@ const GROUP_COLORS: Record<GroupKey, string> = {
   incidents: 'var(--color-stuck-red)',
   maintenance: 'var(--color-working_orange)',
   policy: 'var(--color-bright-blue)',
-  reports: 'var(--color-purple)',
   techUpdates: 'var(--color-chili-blue)',
 };
 
@@ -39,7 +38,6 @@ const GROUP_ART: Record<GroupKey, string> = {
   incidents: 'linear-gradient(135deg, #ffefe9, #ffe4dc)',
   maintenance: 'linear-gradient(135deg, #fff4dc, #ffedc7)',
   policy: 'linear-gradient(135deg, #e4f1fb, #d7eaf9)',
-  reports: 'linear-gradient(135deg, #efeafa, #e5ddf7)',
   techUpdates: 'linear-gradient(135deg, #e0f4f6, #d4f0f3)',
 };
 
